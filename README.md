@@ -1,7 +1,7 @@
 Gate — An utility to await multiple asynchronous calls
 =======================================================
 
-Gate is an utility to await multiple asynchronous calls in node.js.
+Gate is an utility to await multiple asynchronous calls in Node environment.
 
 ## Installing
 
