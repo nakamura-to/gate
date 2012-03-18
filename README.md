@@ -6,7 +6,7 @@ Gate is an utility to await multiple asynchronous calls in Node environment.
 ## Installing
 
 ```
-$ npm install await
+$ npm install gate
 ```
 
 ## Example
