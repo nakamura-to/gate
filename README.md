@@ -65,7 +65,7 @@ Awaits all asynchronous calls completion and then runs a `callback`.
 
 * `callback`: Required. A callback to run after all asynchronous calls completion.
 * `err`: Required. An error to indicate any asynhronous calls are failed. 
-If the `err` is `object` type, it have a property `callbackLocation` to tell you which async call is related the `err`.
+If the `err` is `object` type, it have a property `callbackLocation` to inform which async call is related to the `err`.
 * `results`: Required. An array to contain each asynchronous call result as element.
 
 ## More Examples
@@ -128,7 +128,7 @@ process.nextTick(function () {
 
 ### Error Handling
 
-Check `err.callbackLocation` at an await callback to know which async call is related the `err`.
+Check `err.callbackLocation` at an await callback to know which async call is related to the `err`.
 
 ```js
 var gate = require('gate');
