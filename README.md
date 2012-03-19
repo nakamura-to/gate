@@ -32,13 +32,13 @@ latch.await(function (err, results) {
 
 ### latch([Number count]) -> Function
 
-Return a function which represents a latch. The returned function provides following API.
+Returns a function which represents a latch. The returned function provides following API.
 
 * `count`: Optional. A number of times the returned function must be called before an awaiting callback can start.
 
 #### ([Object mapping][, Boolean skipErrorCheck]) -> Function
 
-Accept an argument mapping definition and return a callback.
+Accepts an argument mapping definition and returns a callback.
 If a count is given with `gate.latch()`, the count is decremented.
 
 * `mapping`: Optional. An argument mapping definition. The `mappipng` must be a number or an object.
@@ -50,18 +50,18 @@ If the `mapping` is `null` or `undefined`, all callback arguments are mapped as 
 
 ### count() -> Number
 
-Get a current count, if a count is given with `gate.latch()`.
+Gets a current count, if a count is given with `gate.latch()`.
 Otherwise, `-1` is returned.
 
 #### val(Object value) -> Object
 
-Wrap a value to distinguish between a value as argument and a mapping index.
+Wraps a value to distinguish between a value as argument and a mapping index.
 
 * `value`: Required. A value.
 
 #### await(Function callback(err, results)) -> Function
 
-Await all asynchronous calls completion and then run a `callback`.
+Awaits all asynchronous calls completion and then runs a `callback`.
 
 * `callback`: Required. A callback to run after all asynchronous calls completion.
 * `err`: Required. An error to indicate any asynhronous calls are failed.
@@ -71,7 +71,7 @@ Await all asynchronous calls completion and then run a `callback`.
 
 ### Arguments Mapping
 
-Pass an argument index or an object includes argument indexs to a function to be returned from `gate.latch()`. 
+Pass an argument index or an object includes argument indexs to a function being returned from `gate.latch()`. 
 In the object, values except whose type is `number` are recognized arguments. 
 To pass an number as argument, wrap it with `val` function. 
 
@@ -127,7 +127,7 @@ process.nextTick(function () {
 
 ### Error Check Skipping
 
-Pass `true` as 2nd argument to a function to be returned from `gate.latch()`. 
+Pass `true` as 2nd argument to a function being returned from `gate.latch()`. 
 This is useful to check each error one by one.
 
 ```js
@@ -149,7 +149,7 @@ latch.await(function (err, results) {
 
 ### Loop
 
-Call a function to be returned from `gate.latch()` in a loop.
+Call a function being returned from `gate.latch()` in a loop.
 
 ```js
 var gate = require('gate');
@@ -164,5 +164,28 @@ latch.await(function (err, results) {
   if (err) throw err;
   console.log(results[0]); // { name: 'file1', data: 'FILE1' }
   console.log(results[1]); // { name: 'file2', data: 'FILE2' }
+});
+```
+
+### Loop in Parallel
+
+Use [Parray](https://github.com/nakamura-to/parallel) to loop array elements in parallel.
+
+```js
+var gate = require('gate');
+var parray = require('parray');
+var fs = require('fs');
+
+var files = ['file1', 'file2'];
+var latch = gate.latch();
+parray.forEach(files, function (file) {
+  fs.readFile(file, 'utf8', latch({name: file, data: 1}));
+}, function () {
+  latch.await(function (err, results) {
+    if (err) throw err;
+    console.log(results[0]); // { name: 'file1', data: 'FILE1' }
+    console.log(results[1]); // { name: 'file2', data: 'FILE2' }
+    console.log('done');
+  });
 });
 ```
