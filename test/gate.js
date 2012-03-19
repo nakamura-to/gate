@@ -64,8 +64,21 @@ describe('latch', function() {
     process.nextTick(function () {
       callback('ERROR');
     });
-    latch.await(function (err) {
+    latch.await(function (err) {      
       assert.strictEqual('ERROR', err);
+      done();
+    });
+  });
+
+  it('should handle error object', function (done) {
+    var latch = gate.latch();
+    var callback = latch(1);
+    process.nextTick(function () {
+      callback(new Error('ERROR'));
+    });
+    latch.await(function (err) {
+      assert.strictEqual('ERROR', err.message);
+      assert(err.callbackLocation);
       done();
     });
   });

@@ -64,7 +64,8 @@ Wraps a value to distinguish between a value as argument and a mapping index.
 Awaits all asynchronous calls completion and then runs a `callback`.
 
 * `callback`: Required. A callback to run after all asynchronous calls completion.
-* `err`: Required. An error to indicate any asynhronous calls are failed.
+* `err`: Required. An error to indicate any asynhronous calls are failed. 
+If the `err` is `object` type, it have a property `callbackLocation` to tell you which async call is related the `err`.
 * `results`: Required. An array to contain each asynchronous call result as element.
 
 ## More Examples
@@ -122,6 +123,27 @@ process.nextTick(function () {
   files.forEach(function (file) {
     fs.readFile(file, 'utf8', latch({name: file, data: 1}));
   });
+});
+```
+
+### Error Handling
+
+Check `err.callbackLocation` at an await callback to know which async call is related the `err`.
+
+```js
+var gate = require('gate');
+var fs = require('fs');
+
+var latch = gate.latch();
+fs.readFile('file1', 'utf8', latch({name: 'file1', data: 1}));
+fs.readFile('non-existent', 'utf8', latch({name: 'non-existent', data: 1}));
+
+latch.await(function (err, results) {
+  if (err) {
+    console.log(err + ', callbackLocation: ' + err.callbackLocation);
+  } else {
+    console.log(results);
+  }
 });
 ```
 
