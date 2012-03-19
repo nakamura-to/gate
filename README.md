@@ -169,7 +169,7 @@ latch.await(function (err, results) {
 
 ### Loop in Parallel
 
-Use [Parray](https://github.com/nakamura-to/parallel) to loop array elements in parallel.
+Use [Parray](https://github.com/nakamura-to/parray) to loop array elements in parallel.
 
 ```js
 var gate = require('gate');
