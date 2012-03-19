@@ -211,3 +211,41 @@ parray.forEach(files, function (file) {
   });
 });
 ```
+
+## Best Practices
+
+### Wrap Asynchronous Callbacks
+
+Wrap asynchronous callbacks to manage error handling.
+For example, define a following function.
+
+```js
+function bind(callback) {
+  return function (err) {
+    if (err) {
+      err.message += ', callbackLocation: ' + err.callbackLocation;
+      throw err;
+    }
+    callback.apply(null, Array.prototype.slice.call(arguments, 1));
+  }
+}
+```
+
+Use above function as follows:
+
+```js
+var gate = require('gate');
+var fs = require('fs');
+
+var latch = gate.latch();
+fs.readFile('path1', 'utf8', latch(1));
+fs.readFile('path2', 'utf8', latch(1));
+latch.await(bind(function (results) {
+  fs.writeFile('path3', results[0] + results[1], bind(function () {
+    fs.readFile('path3', 'utf8', bind(function (data) {
+      console.log(data);
+      console.log('all done');
+    }));
+  }));
+}));
+```
