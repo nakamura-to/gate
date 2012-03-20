@@ -5,7 +5,7 @@
     "keywords"      : ["control-flow", "async", "wait", "await"],
     "author"        : "Toshihiro Nakamura <toshihiro.nakamura@gmail.com>",
     "contributors"  : [],
-    "repository"    : {"type": "git", "url": "git@github.com:nakamura-to/gate.git"},
+    "repository"    : {"type": "git", "url": "git://github.com/nakamura-to/gate.git"},
     "main"          : "./lib/gate.js",
     "devDependencies": { 
       "mocha":      "~0.11.0"
