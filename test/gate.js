@@ -78,8 +78,8 @@ describe('latch', function() {
     });
     g.await(function (err) {
       assert.strictEqual('ERROR', err.message);
-      assert(err.callbackLocation);
-      done();
+      assert(err.gate_location);
+      done(); 
     });
   });
 

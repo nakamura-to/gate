@@ -1,11 +1,11 @@
 var gate = require('../index');
 
-var latch = gate.latch();
-setTimeout(latch({val: 'a'}), 30);
-setTimeout(latch({val: 'b'}), 20);
-setTimeout(latch({val: 'c'}), 10);
+var g = gate.create();
+setTimeout(g.latch({val: 'a'}), 30);
+setTimeout(g.latch({val: 'b'}), 20);
+setTimeout(g.latch({val: 'c'}), 10);
 
-latch.await(function (err, results) {
+g.await(function (err, results) {
   if (err) throw err;
   console.log(results);
 });

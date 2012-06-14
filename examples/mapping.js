@@ -2,18 +2,18 @@ var gate = require('../index');
 var fs = require('fs');
 var exec = require('child_process').exec;
 
-var latch = gate.latch();
+var g = gate.create();
 
 // single mapping: arguments[1] in the callback will be result
-fs.readFile('file1', 'utf8', latch(1)); 
+fs.readFile('file1', 'utf8', g.latch(1)); 
 
 // multiple mapping: object including arguments[1] and argments[2] in the callback will be result
-exec('cat *.js bad_file | wc -l', latch({stdout: 1, stderr: 2}));
+exec('cat *.js bad_file | wc -l', g.latch({stdout: 1, stderr: 2}));
 
 // all mapping: all arguments in the callback will be result
-fs.readFile('file2', 'utf8', latch());
+fs.readFile('file2', 'utf8', g.latch());
 
-latch.await(function (err, results) {
+g.await(function (err, results) {
   if (err !== null) {
     console.log('exec error: ' + err);
   }
