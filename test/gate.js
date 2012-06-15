@@ -2,6 +2,43 @@ var gate = require('../lib/gate.js');
 var assert = require('assert');
 
 describe('latch', function() {
+
+  it('should latch with index', function (done) {
+    var g = gate.create();
+    process.nextTick(g.latch({val: 'a'}));
+    process.nextTick(g.latch({val: 'b'}));
+    g.await(function (err, results) {
+      if (err) throw err;
+      assert.deepEqual({val: 'a'}, results[0]);
+      assert.deepEqual({val: 'b'}, results[1]);
+      done();
+    });
+  });
+
+  it('should latch with name', function (done) {
+    var g = gate.create();
+    process.nextTick(g.latch('hoge', {val: 'a'}));
+    process.nextTick(g.latch('foo', {val: 'b'}));
+    g.await(function (err, results) {
+      if (err) throw err;
+      assert.deepEqual({val: 'a'}, results.hoge);
+      assert.deepEqual({val: 'b'}, results.foo);
+      done();
+    });
+  });
+
+  it('should latch with index and name', function (done) {
+    var g = gate.create();
+    process.nextTick(g.latch('hoge', {val: 'a'}));
+    process.nextTick(g.latch({val: 'b'}));
+    g.await(function (err, results) {
+      if (err) throw err;
+      assert.deepEqual({val: 'a'}, results.hoge);
+      assert.deepEqual({val: 'b'}, results[1]);
+      done();
+    });
+  });
+
   it('should await async calls', function (done) {
     var g = gate.create();
     process.nextTick(g.latch({val: 'a'}));
