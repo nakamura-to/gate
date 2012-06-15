@@ -18,7 +18,7 @@ g.await(function (err, results) {
     console.log('exec error: ' + err);
   }
   console.log('file1: ' + results[0]);
-  console.log('stdout[1]: ' + results[1].stdout);
-  console.log('stderr[1]: ' + results[1].stderr);
+  console.log('stdout: ' + results[1].stdout);
+  console.log('stderr: ' + results[1].stderr);
   console.log('file2: ' + results[2]);
 });
