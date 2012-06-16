@@ -1,7 +1,6 @@
 {
     "name"          : "gate",
     "description"   : "An utility to await multiple asynchronous calls in Node environment",
-    "homepage"      : "https://github.com/nakamura-to/gate",
     "keywords"      : ["control-flow", "async", "wait", "await"],
     "author"        : "Toshihiro Nakamura <toshihiro.nakamura@gmail.com>",
     "contributors"  : [],
