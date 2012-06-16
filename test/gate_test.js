@@ -95,21 +95,21 @@ describe('latch', function() {
     assert.strictEqual(0, g.count);
   });
 
-  it('should handle error', function (done) {
+  it('should handle non-error object', function (done) {
     var g = gate.create();
-    var callback = g.latch(1);
+    var callback = g.latch();
     process.nextTick(function () {
       callback('ERROR');
     });
-    g.await(function (err) {      
-      assert.strictEqual('ERROR', err);
+    g.await(function (err) {
+      if (err) throw err;
       done();
     });
   });
 
   it('should handle error object', function (done) {
     var g = gate.create();
-    var callback = g.latch(1);
+    var callback = g.latch();
     process.nextTick(function () {
       callback(new Error('ERROR'));
     });
@@ -124,11 +124,10 @@ describe('latch', function() {
     var g = gate.create();
     var callback = g.latch(0, true);
     process.nextTick(function () {
-      callback('ERROR');
+      callback(new Error('ERROR'));
     });
     g.await(function (err, results) {
-      if (err) throw err;
-      assert.strictEqual('ERROR', results[0]);
+      assert.ok('ERROR', results[0].message);
       done();
     });
   });
