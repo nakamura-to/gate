@@ -184,9 +184,6 @@ Otherwise, `-1` is returned.
 This is a readonly property.
 
 ```js
-var gate = require('gate');
-var fs = require('fs');
-
 var g = gate.create(2);
 
 console.log(g.count); // 2
