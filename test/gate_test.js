@@ -51,7 +51,7 @@ describe('latch', function() {
   });
 
   it('should await async calls with a given count', function (done) {
-    var g = gate.create(3);
+    var g = gate.create({count: 3});
     g.await(function (err, results) {
       if (err) throw err;
       assert.deepEqual([{val: 'a'}, {val: 'b'}, {val: 'c'}], results);
@@ -79,7 +79,7 @@ describe('latch', function() {
   });
 
   it('should await sync calls with a given count', function (done) {
-    var g = gate.create(3);
+    var g = gate.create({count: 3});
     g.await(function (err, results) {
       if (err) throw err;
       assert.deepEqual([{val: 'a'}, {val: 'b'}, {val: 'c'}], results);
@@ -121,8 +121,8 @@ describe('latch', function() {
   });
 
   it('should skip error check', function (done) {
-    var g = gate.create();
-    var callback = g.latch(0, true);
+    var g = gate.create({failFast: false});
+    var callback = g.latch(0);
     process.nextTick(function () {
       callback(new Error('ERROR'));
     });
