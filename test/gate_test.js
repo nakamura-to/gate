@@ -189,4 +189,24 @@ describe('latch', function() {
   });
   */
 
+  it('should nest gate', function (done) {
+    var g = gate.create();
+    setTimeout(g.latch({val: 'a'}), 0);
+    setTimeout(g.latch({val: 'b'}), 0);
+    g.await(function (err, results, g) {
+      if (err) throw err;
+      assert.deepEqual({val: 'a'}, results[0]);
+      assert.deepEqual({val: 'b'}, results[1]);
+      setTimeout(g.latch({val: 'c'}), 0);
+      setTimeout(g.latch({val: 'd'}), 0);
+      g.await(function (err, results) {
+        if (err) throw err;
+        assert.deepEqual({val: 'c'}, results[0]);
+        assert.deepEqual({val: 'd'}, results[1]);
+        done();
+      });
+    });
+  });
+
+
 });
