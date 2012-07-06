@@ -1,4 +1,5 @@
 var gate = require('../lib/gate.js');
+var domain = require('domain');
 var assert = require('assert');
 
 describe('latch', function() {
@@ -157,5 +158,35 @@ describe('latch', function() {
       done();
     });
   });
+
+  it('should intercept with a domain', function (done) {
+    var d = domain.create().on('error', function (err) {
+      assert.ok('ERROR', err.message);
+      done();
+    });
+    var g = gate.create({domain: d});
+    var callback = g.latch();
+    setTimeout(function () {
+      callback(new Error('ERROR'));
+    }, 0);
+    g.await(function () {});
+  });
+
+  /*
+  it('should handle thrown error with a domain', function (done) {
+    var d = domain.create().on('error', function (err) {
+      assert.ok('ERROR2', err.message);
+      done();
+    });
+    var g = gate.create({domain: d, failFast: false});
+    var callback = g.latch();
+    setTimeout(function () {
+      callback(new Error('ERROR'));
+    }, 0);
+    g.await(function () {
+      throw new Error('ERROR2');
+    });
+  });
+  */
 
 });
