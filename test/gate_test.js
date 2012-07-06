@@ -5,8 +5,8 @@ describe('latch', function() {
 
   it('should latch with index', function (done) {
     var g = gate.create();
-    process.nextTick(g.latch({val: 'a'}));
-    process.nextTick(g.latch({val: 'b'}));
+    setTimeout(g.latch({val: 'a'}), 0);
+    setTimeout(g.latch({val: 'b'}), 0);
     g.await(function (err, results) {
       if (err) throw err;
       assert.deepEqual({val: 'a'}, results[0]);
@@ -17,8 +17,8 @@ describe('latch', function() {
 
   it('should latch with name', function (done) {
     var g = gate.create();
-    process.nextTick(g.latch('hoge', {val: 'a'}));
-    process.nextTick(g.latch('foo', {val: 'b'}));
+    setTimeout(g.latch('hoge', {val: 'a'}), 0);
+    setTimeout(g.latch('foo', {val: 'b'}), 0);
     g.await(function (err, results) {
       if (err) throw err;
       assert.deepEqual({val: 'a'}, results.hoge);
@@ -29,8 +29,8 @@ describe('latch', function() {
 
   it('should latch with index and name', function (done) {
     var g = gate.create();
-    process.nextTick(g.latch('hoge', {val: 'a'}));
-    process.nextTick(g.latch({val: 'b'}));
+    setTimeout(g.latch('hoge', {val: 'a'}), 0);
+    setTimeout(g.latch({val: 'b'}), 0);
     g.await(function (err, results) {
       if (err) throw err;
       assert.deepEqual({val: 'a'}, results.hoge);
@@ -41,8 +41,8 @@ describe('latch', function() {
 
   it('should await async calls', function (done) {
     var g = gate.create();
-    process.nextTick(g.latch({val: 'a'}));
-    process.nextTick(g.latch({val: 'b'}));
+    setTimeout(g.latch({val: 'a'}), 0);
+    setTimeout(g.latch({val: 'b'}), 0);
     g.await(function (err, results) {
       if (err) throw err;
       assert.deepEqual([{val: 'a'}, {val: 'b'}], results);
@@ -57,13 +57,13 @@ describe('latch', function() {
       assert.deepEqual([{val: 'a'}, {val: 'b'}, {val: 'c'}], results);
       done();
     });
-    process.nextTick(g.latch({val: 'a'}));
+    setTimeout(g.latch({val: 'a'}), 0);
     assert.strictEqual(2, g.count);
-    process.nextTick(g.latch({val: 'b'}));
+    setTimeout(g.latch({val: 'b'}), 0);
     assert.strictEqual(1, g.count);
-    process.nextTick(g.latch({val: 'c'}));
+    setTimeout(g.latch({val: 'c'}), 0);
     assert.strictEqual(0, g.count);
-    process.nextTick(g.latch({val: 'd'}));
+    setTimeout(g.latch({val: 'd'}), 0);
     assert.strictEqual(0, g.count);
   });
 
@@ -98,9 +98,9 @@ describe('latch', function() {
   it('should handle non-error object', function (done) {
     var g = gate.create();
     var callback = g.latch();
-    process.nextTick(function () {
+    setTimeout(function () {
       callback('ERROR');
-    });
+    }, 0);
     g.await(function (err) {
       if (err) throw err;
       done();
@@ -110,9 +110,9 @@ describe('latch', function() {
   it('should handle error object', function (done) {
     var g = gate.create();
     var callback = g.latch();
-    process.nextTick(function () {
+    setTimeout(function () {
       callback(new Error('ERROR'));
-    });
+    }, 0);
     g.await(function (err) {
       assert.strictEqual('ERROR', err.message);
       assert(err.gate_location);
@@ -123,9 +123,9 @@ describe('latch', function() {
   it('should skip error check', function (done) {
     var g = gate.create({failFast: false});
     var callback = g.latch(0);
-    process.nextTick(function () {
+    setTimeout(function () {
       callback(new Error('ERROR'));
-    });
+    }, 0);
     g.await(function (err, results) {
       assert.ok('ERROR', results[0].message);
       done();
@@ -135,9 +135,9 @@ describe('latch', function() {
   it('should map values', function (done) {
     var g = gate.create();
     var callback = g.latch({name: 'aaa', age: g.val(20), arg1: 1, arg2: 2});
-    process.nextTick(function () {
+    setTimeout(function () {
       callback(0, 'bbb', 100);
-    });
+    }, 0);
     g.await(function (err, results) {
       if (err) throw err;
       assert.deepEqual([{name: 'aaa', age: 20, arg1: 'bbb', arg2: 100}], results);
@@ -148,9 +148,9 @@ describe('latch', function() {
   it('should map all values', function (done) {
     var g = gate.create();  
     var callback = g.latch();
-    process.nextTick(function () {
+    setTimeout(function () {
       callback(null, 'bbb', 100);
-    });
+    }, 0);
     g.await(function (err, results) {
       if (err) throw err;
       assert.deepEqual([[null, 'bbb', 100]], results);

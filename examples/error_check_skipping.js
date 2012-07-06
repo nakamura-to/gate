@@ -1,9 +1,9 @@
 var gate = require('../index');
 var fs = require('fs');
 
-var g = gate.create();
-fs.readFile('non-existent1', 'utf8', g.latch({err: 0, data: 1}, true));
-fs.readFile('no n-existent2', 'utf8', g.latch({err: 0, data: 1}, true));
+var g = gate.create({failFast: false});
+fs.readFile('non-existent1', 'utf8', g.latch({err: 0, data: 1}));
+fs.readFile('no n-existent2', 'utf8', g.latch({err: 0, data: 1}));
 
 g.await(function (err, results) {
   if (results[0].err) {
