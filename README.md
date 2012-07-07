@@ -51,25 +51,53 @@ g.await(function (err, results) {
 
 `gate` module provides following API. 
 
-#### create([Number count]) -> Gate
+#### create([Object options]) -> Gate
 
 Returns a Gate object. 
 
-* `count`: Optional. A number of times the returned function must be called before an awaiting callback can start.
+* `options`: Optional. The `options` can have followng keys.
+
+<table>
+<tr>
+<th>KEY</th><th>TYPE</th><th>DEFAULT VALUE</th><th>DESCRIPTION</th>
+</tr>
+<tr>
+<td>count</td>
+<td>Number</td>
+<td>-1</td>
+<td>
+A number of times the returned function must be called before an awaiting callback can start.
+Navative value means that count is not specified.
+</td>
+</tr>
+<tr>
+<td>failFast</td>
+<td>Boolean</td>
+<td>true</td>
+<td>
+If `failFast` is true, an awaiting callback is invoked as soon as possible when any error is found. 
+The found error becomes first argument of the awaiting callback.
+
+If `failFast` is false, all errors are ignored and an awaiting callback is invoked after all asynchronous calls are completed. 
+It is your responsiblity to handle errors. 
+</td>
+</tr>
+</table>
+
 
 ```js
 var g = gate.create();
 ```
 
 ```js
-var g = gate.create(5);
+var g = gate.create({count: 5, failFast: false}});
 ```
 
 --
 
 `Gate` object provides following API.
 
-#### latch([String name][, Object mapping][, Boolean skipErrorCheck]) -> Function
+#### latch([String name][, Object mapping]) -> Function
 
 Returns a callback. The callback arguments are mapped with a `mapping` definition.
 If a count is given to `gate.create()`, the count is decremented.
@@ -112,22 +140,6 @@ g.await(function (err, results) {
 
 ```
 
-* `skipErrorCheck`: Optional. Indicates whether error check is skipped or not. Default value is `false`.
-
-```js
-var g = gate.create();
-fs.readFile('file1', 'utf8', g.latch({err: 0, data: 1}, true));
-fs.readFile('file2', 'utf8', g.latch({err: 0, data: 1}, true));
-
-g.await(function (err, results) {
-  console.log(results[0].err);  // read error file1
-  console.log(results[0].data); // content for file1
-  console.log(results[1].err);  // read error for file2
-  console.log(results[1].data); // content for file2
-});
-
-```
-
 #### val(Object value) -> Object
 
 Indicates that a value is a plain value and it's not a mapping index.
@@ -150,14 +162,15 @@ g.await(function (err, results) {
 });
 ```
 
-#### await(Function callback(err, results)) -> Function
+#### await(Function callback(err, results, gate)) -> Function
 
 Awaits all asynchronous calls completion and then runs a `callback`.
 
 * `callback`: Required. A callback to run after all asynchronous calls completion.
-* `err`: Required. An error to indicate any asynhronous calls are failed. 
+* `err`: An error to indicate any asynhronous calls are failed. 
 If the `err` exists, it have a property `gate_location` to inform which async call is related to the `err`.
-* `results`: Required. An array to contain each asynchronous call result(arguments of asynchronous callback) as element.
+* `results`: An array to contain each asynchronous call result(arguments of asynchronous callback) as element.
+* `gate`: A new gate object;
 
 ```js
 var g = gate.create();
@@ -166,7 +179,6 @@ fs.readFile('file2', 'utf8', g.latch({data: 1}));
 
 g.await(function (err, results) {
   if (err) {
-    console.log(err.gate_location); // error location
     console.log(err);
   } else {
     console.log(results[0].data); 
@@ -177,7 +189,6 @@ g.await(function (err, results) {
 ```
 
 ### count: Number
-
 
 Gets a current count, if a count is given to `gate.latch()`.
 Otherwise, `-1` is returned.
@@ -252,7 +263,7 @@ process.nextTick(function () {
 });
 ```
 
-### Error Handling
+### Error Handling - handling first error
 
 Check `err.gate_location` at an await callback to know which async call is related to the `err`.
 
@@ -273,18 +284,18 @@ g.await(function (err, results) {
 });
 ```
 
-### Error Check Skipping
+### Error Handling - handling all errors
 
-Pass `true` as 2nd argument to a function being returned from `gate.create()`. 
-This is useful to check each error one by one.
+Turn off `failFaslt` and include an error object in each result. 
+This is useful to handle all errors.
 
 ```js
 var gate = require('gate');
 var fs = require('fs');
 
-var g = gate.create();
-fs.readFile('non-existent1', 'utf8', g.latch({err: 0, data: 1}, true));
-fs.readFile('non-existent2', 'utf8', g.latch({err: 0, data: 1}, true));
+var g = gate.create({failFast: false});
+fs.readFile('non-existent1', 'utf8', g.latch({err: 0, data: 1}));
+fs.readFile('non-existent2', 'utf8', g.latch({err: 0, data: 1}));
 
 g.await(function (err, results) {
   results.forEach(function (result) {
@@ -295,25 +306,28 @@ g.await(function (err, results) {
 });
 ```
 
-### Loop in Parallel
+### Nesting
 
-Use [Parray](https://github.com/nakamura-to/parray) to loop large array elements in parallel.
+Use 3rd argument of an awaiting callback to nest 'gate.await()'.
 
 ```js
 var gate = require('gate');
-var parray = require('parray');
 var fs = require('fs');
 
-var files = ['file1', 'file2'];
 var g = gate.create();
-parray.forEach(files, function (file) {
-  fs.readFile(file, 'utf8', g.latch({name: file, data: 1}));
-}, function () {
-  g.await(function (err, results) {
+fs.readFile('file1', 'utf8', g.latch({data: 1}));
+fs.readFile('file2', 'utf8', g.latch({data: 1}));
+
+g.await(function (err, results, g) {
+  if (err) throw err;
+  var name1 = results[0].data;
+  var name2 = results[1].data;
+  fs.readFile(name1, 'utf8', g.latch({data: 1}));
+  fs.readFile(name2, 'utf8', g.latch({data: 1}));
+  g.await(function (err, results, g) {
     if (err) throw err;
-    console.log(results[0]);
-    console.log(results[1]);
-    console.log('done');
+    console.log(results[0].data); // content for name1
+    console.log(results[1].data); // content for name2
   });
 });
 ```
