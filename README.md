@@ -167,13 +167,13 @@ g.await(function (err, results) {
 });
 ```
 
-#### await(Function callback(err, results, gate)) -> Function
+#### await(Function callback(Error err, Object results, Gate gate)) -> Function
 
 Awaits all asynchronous calls completion and then runs a `callback`.
 
 * `callback`: Required. A callback to run after all asynchronous calls are done.
 * `err`: An error to indicate any asynhronous calls are failed.
-* `results`: An array to contain each asynchronous result as element.
+* `results`: An object to contain each asynchronous result as property.
 * `gate`: A new gate object.
 
 ```js
@@ -259,11 +259,11 @@ g.await(function (err, results) {
   console.log(results[1]);
 });
 
-process.nextTick(function () {
+setTimeout(function () {
   files.forEach(function (file) {
     fs.readFile(file, 'utf8', g.latch({name: file, data: 1}));
   });
-});
+}, 0);
 ```
 
 ### Error Handling
@@ -299,12 +299,13 @@ var gate = require('gate');
 var fs = require('fs');
 
 var g = gate.create({failFast: false});
-fs.readFile('non-existent1', 'utf8', g.latch({err: 0, data: 1}));
-fs.readFile('non-existent2', 'utf8', g.latch({err: 0, data: 1}));
+fs.readFile('non-existent1', 'utf8', g.latch({err: 0, data: 1})); // include an error object
+fs.readFile('non-existent2', 'utf8', g.latch({err: 0, data: 1})); // include an error object
 
 g.await(function (err, results) {
   // handle all errors
-  results.forEach(function (result) {
+  Object.keys(results).forEach(function (key) {
+    var result = results[key];
     if (result.err) {
       console.log(result.err);
     } 
