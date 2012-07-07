@@ -20,13 +20,13 @@ var gate = require('gate');
 var fs = require('fs');
 
 var g = gate.create();
-fs.readFile('file1', 'utf8', g.latch({data: 1}));
-fs.readFile('file2', 'utf8', g.latch({data: 1}));
+fs.readFile('file1', 'utf8', g.latch(1));
+fs.readFile('file2', 'utf8', g.latch(1));
 
 g.await(function (err, results) {
   if (err) throw err;
-  console.log(results[0].data); // content for file1
-  console.log(results[1].data); // content for file2
+  console.log(results[0]); // content for file1
+  console.log(results[1]); // content for file2
 });
 ```
 
@@ -37,13 +37,13 @@ var gate = require('gate');
 var fs = require('fs');
 
 var g = gate.create();
-fs.readFile('file1', 'utf8', g.latch('file1Result', {data: 1}));
-fs.readFile('file2', 'utf8', g.latch('file2Result', {data: 1}));
+fs.readFile('file1', 'utf8', g.latch('file1Result', 1));
+fs.readFile('file2', 'utf8', g.latch('file2Result', 1));
 
 g.await(function (err, results) {
   if (err) throw err;
-  console.log(results.file1Result.data); // content for file1
-  console.log(results.file2Result.data); // content for file2
+  console.log(results.file1Result); // content for file1
+  console.log(results.file2Result); // content for file2
 });
 ```
 
@@ -178,15 +178,15 @@ Awaits all asynchronous calls completion and then runs a `callback`.
 
 ```js
 var g = gate.create();
-fs.readFile('file1', 'utf8', g.latch({data: 1}));
-fs.readFile('file2', 'utf8', g.latch({data: 1}));
+fs.readFile('file1', 'utf8', g.latch(1));
+fs.readFile('file2', 'utf8', g.latch(1));
 
 g.await(function (err, results) {
   if (err) {
     console.log(err);
   } else {
-    console.log(results[0].data); 
-    console.log(results[1].data); 
+    console.log(results[0]); 
+    console.log(results[1]); 
   }
 });
 ```
@@ -201,9 +201,9 @@ This is a readonly property.
 var g = gate.create(2);
 
 console.log(g.count); // 2
-fs.readFile('file1', 'utf8', g.latch({data: 1}));
+fs.readFile('file1', 'utf8', g.latch(1));
 console.log(g.count); // 1
-fs.readFile('file2', 'utf8', g.latch({data: 1}));
+fs.readFile('file2', 'utf8', g.latch(1));
 console.log(g.count); // 0
 ```
 
@@ -322,19 +322,19 @@ var gate = require('gate');
 var fs = require('fs');
 
 var g = gate.create();
-fs.readFile('file1', 'utf8', g.latch({data: 1}));
-fs.readFile('file2', 'utf8', g.latch({data: 1}));
+fs.readFile('file1', 'utf8', g.latch(1));
+fs.readFile('file2', 'utf8', g.latch(1));
 
 g.await(function (err, results, g) {
   if (err) throw err;
-  var name1 = results[0].data;
-  var name2 = results[1].data;
-  fs.readFile(name1, 'utf8', g.latch({data: 1}));
-  fs.readFile(name2, 'utf8', g.latch({data: 1}));
+  var name1 = results[0]; // content for file1
+  var name2 = results[1]; // content for file2
+  fs.readFile(name1, 'utf8', g.latch(1));
+  fs.readFile(name2, 'utf8', g.latch(1));
   g.await(function (err, results, g) {
     if (err) throw err;
-    console.log(results[0].data); // content for name1
-    console.log(results[1].data); // content for name2
+    console.log(results[0]); // content for name1
+    console.log(results[1]); // content for name2
   });
 });
 ```
