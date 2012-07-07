@@ -11,9 +11,9 @@ $ npm install gate
 
 ## Example
 
-You can get each asynchronous call result by an index or a name.
+You can get each asynchronous result by index or name.
 
-### Indexed Results
+### By Index
 
 ```js
 var gate = require('gate');
@@ -30,7 +30,7 @@ g.await(function (err, results) {
 });
 ```
 
-### Named Results
+### By Name
 
 ```js
 var gate = require('gate');
@@ -46,6 +46,13 @@ g.await(function (err, results) {
   console.log(results.file2Result.data); // content for file2
 });
 ```
+
+## Additions to Error objects
+
+A extra field is added to an Error object.
+
+* `error.gate_locatioin`: The asynchronous call location that the error occurred.
+
 
 ## API
 
@@ -67,7 +74,7 @@ Returns a Gate object.
 <td>-1</td>
 <td>
 A number of times the returned function must be called before an awaiting callback can start.
-Navative value means that count is not specified.
+Negative value means that count is not specified.
 </td>
 </tr>
 <tr>
@@ -75,11 +82,8 @@ Navative value means that count is not specified.
 <td>Boolean</td>
 <td>true</td>
 <td>
-If `failFast` is true, an awaiting callback is invoked as soon as possible when any error is found. 
-The found error becomes first argument of the awaiting callback.
-
-If `failFast` is false, all errors are ignored and an awaiting callback is invoked after all asynchronous calls are completed. 
-It is your responsiblity to handle errors. 
+Indicates whether an awaiting callback is invoked as soon as possible when any error is found. 
+If failFast is true, the found error is set as first argument of the awaiting callback.
 </td>
 </tr>
 </table>
@@ -95,7 +99,7 @@ var g = gate.create({count: 5, failFast: false}});
 
 --
 
-`Gate` object provides following API.
+`Gate` objects provide following API.
 
 #### latch([String name][, Object mapping]) -> Function
 
@@ -107,21 +111,22 @@ If not specified, an index number is used as name.
 
 ```js
 var g = gate.create();
-fs.readFile('file1', 'utf8', g.latch('file1Result', {data: 1})); // name specified
-fs.readFile('file2', 'utf8', g.latch({data: 1}));                // name not specified
+fs.readFile('file1', 'utf8', g.latch('file1Result', {data: 1})); // name is specified
+fs.readFile('file2', 'utf8', g.latch({data: 1}));                // name is not specified
 
 g.await(function (err, results) {
   if (err) throw err;
-  console.log(results.file1Result.data); // content for file1
-  console.log(results[1].data);          // content for file2
+  console.log(results.file1Result.data); // get by name
+  console.log(results[1].data);          // get by index
 });
 
 ```
 
-* `mapping`: Optional. An argument mapping definition. The `mapping` gives names to callback arguments. The `mappipng` must be a number or an object.
-If the `mapping` is a number, single argument is mapped.
-If the `mapping` is an object, multiple arguments can be mapped.
-If the `mapping` is `null` or `undefined`, all arguments are mapped as Array.
+* `mapping`: Optional. An argument mapping definition. The `mapping` gives names to callback arguments. 
+The `mappipng` must be a number or an object.
+ * If the `mapping` is a number, single argument is mapped.
+ * If the `mapping` is an object, multiple arguments can be mapped.
+ * If the `mapping` is `null` or `undefined`, all arguments are mapped as Array.
 
 ```js
 var g = gate.create();
@@ -166,11 +171,10 @@ g.await(function (err, results) {
 
 Awaits all asynchronous calls completion and then runs a `callback`.
 
-* `callback`: Required. A callback to run after all asynchronous calls completion.
-* `err`: An error to indicate any asynhronous calls are failed. 
-If the `err` exists, it have a property `gate_location` to inform which async call is related to the `err`.
-* `results`: An array to contain each asynchronous call result(arguments of asynchronous callback) as element.
-* `gate`: A new gate object;
+* `callback`: Required. A callback to run after all asynchronous calls are done.
+* `err`: An error to indicate any asynhronous calls are failed.
+* `results`: An array to contain each asynchronous result as element.
+* `gate`: A new gate object.
 
 ```js
 var g = gate.create();
@@ -185,7 +189,6 @@ g.await(function (err, results) {
     console.log(results[1].data); 
   }
 });
-
 ```
 
 ### count: Number
@@ -240,9 +243,9 @@ g.await(function (err, results) {
 });
 ```
 
-### Count Down
+### Countdown
 
-Pass a count number to `gate.create()` to wait until a set of callbacks being completed.
+Pass a count number to `gate.create()` to wait until a set of callbacks are done.
 
 ```js
 var gate = require('gate');
@@ -263,9 +266,10 @@ process.nextTick(function () {
 });
 ```
 
-### Error Handling - handling first error
+### Error Handling
 
-Check `err.gate_location` at an await callback to know which async call is related to the `err`.
+Check the first argument of the awaiting callback.
+If the argument is not null, it is any error object.
 
 ```js
 var gate = require('gate');
@@ -276,8 +280,9 @@ fs.readFile('file1', 'utf8', g.latch({name: 'file1', data: 1}));
 fs.readFile('non-existent', 'utf8', g.latch({name: 'non-existent', data: 1}));
 
 g.await(function (err, results) {
+  // handle any error
   if (err) {
-    console.log(err + ', gate_location: ' + err.gate_location);
+    console.log(err);
   } else {
     console.log(results);
   }
@@ -286,8 +291,8 @@ g.await(function (err, results) {
 
 ### Error Handling - handling all errors
 
-Turn off `failFaslt` and include an error object in each result. 
-This is useful to handle all errors.
+Turn off `failFaslt` option and include an error object in each result. 
+Then you can handle all errors by yourself.
 
 ```js
 var gate = require('gate');
@@ -298,6 +303,7 @@ fs.readFile('non-existent1', 'utf8', g.latch({err: 0, data: 1}));
 fs.readFile('non-existent2', 'utf8', g.latch({err: 0, data: 1}));
 
 g.await(function (err, results) {
+  // handle all errors
   results.forEach(function (result) {
     if (result.err) {
       console.log(result.err);
@@ -308,7 +314,7 @@ g.await(function (err, results) {
 
 ### Nesting
 
-Use 3rd argument of an awaiting callback to nest 'gate.await()'.
+You can use third argument of an awaiting callback to nest 'gate.await()'.
 
 ```js
 var gate = require('gate');
