@@ -1,5 +1,9 @@
 # Changelog
 
+ - 0.3.0 (2012/07/07)
+   - New Feature - Gate objects are automatically created for awaiting callbacks to nest easily.
+   - Change - `skipErrorCheck` flag is removed and `failFast` option is introduced.
+
  - 0.2.0 (2012/06/16)
    - New Feature - All APIs are revised.
 
