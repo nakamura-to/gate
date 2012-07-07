@@ -7,7 +7,7 @@ fs.readFile('non-existent', 'utf8', g.latch({name: 'non-existent', data: 1}));
 
 g.await(function (err, results) {
   if (err) {
-    console.log(err + ', gate_location: ' + err.gate_location);
+    console.log(err);
   } else {
     console.log(results);
   }

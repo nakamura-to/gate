@@ -9,8 +9,8 @@ g.await(function (err, results) {
   console.log(results[1]); // { name: 'file2', data: 'FILE2' }
 });
 
-process.nextTick(function () {
+setTimeout(function () {
   files.forEach(function (file) {
     fs.readFile(file, 'utf8', g.latch({name: file, data: 1}));
   });
-});
+}, 0);
