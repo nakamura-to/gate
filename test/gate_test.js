@@ -128,7 +128,7 @@ describe('latch', function() {
       callback(new Error('ERROR'));
     }, 0);
     g.await(function (err, results) {
-      assert.ok('ERROR', results[0].message);
+      assert.strictEqual('ERROR', results[0].message);
       done();
     });
   });
