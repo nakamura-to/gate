@@ -224,7 +224,7 @@ var exec = require('child_process').exec;
 var g = gate.create();
 
 // single mapping: arguments[1] in the callback will be result
-fs.readFile('file1', 'utf8', latch(1)); 
+fs.readFile('file1', 'utf8', g.latch(1)); 
 
 // multiple mapping: arguments[1] and argments[2] in the callback will be result
 exec('cat *.js bad_file | wc -l', g.latch({stdout: 1, stderr: 2}));
