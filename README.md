@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/nakamura-to/gate.png)](http://travis-ci.org/nakamura-to/gate)
 Gate — An utility to await multiple asynchronous calls
 =======================================================
 
